@@ -1,5 +1,6 @@
 require 'rubygems'
 require 'zip'
+require 'net/ftp'
 
 folder = "/home/lawgix/zip_ftp/input"
 input_filenames = ['sample.txt']
@@ -15,3 +16,14 @@ Zip::File.open(zipfile_name, Zip::File::CREATE) do |zipfile|
   end
   zipfile.get_output_stream("myFile") { |os| os.write "myFile contains just this" }
 end
+
+Net::FTP.open('localhost') do |ftp|
+  ftp.passive = true
+  ftp.login('lawgix','obwon=419')
+  files = ftp.chdir('/home/lawgix')
+  puts files
+  files = ftp.list('n*')
+  puts files
+  ftp.put(zipfile_name)
+end
+
