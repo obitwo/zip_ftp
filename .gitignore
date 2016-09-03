@@ -1,3 +1,4 @@
 *.swp
 *.swo
 output/*.zip
+ftp/*.zip
