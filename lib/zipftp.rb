@@ -1,26 +1,41 @@
 require 'zip'
 require 'net/ftp'
+require 'byebug'
 
-folder = "/home/lawgix/zip_ftp/input"
-input_filenames = ['sample.txt']
+class ZipFtp
 
-zipfile_name = "/home/lawgix/zip_ftp/output/archive.zip"
+  attr_reader :filepath, :ftp_host, :ftp_login, :ftp_password, :ftp_directory, :zip_output_directory, :zip_filename, :sent
+  alias_method :sent?, :sent
 
-Zip::File.open(zipfile_name, Zip::File::CREATE) do |zipfile|
-  input_filenames.each do |filename|
-    # Two arguments:
-    # - The name of the file as it will appear in the archive
-    # - The original file, including the path to find it
-    zipfile.add(filename, folder + '/' + filename)
+  def initialize(opts)
+    @filepath, @ftp_host, @ftp_login, @ftp_password, @ftp_directory, @zip_output_directory, @zip_filename, @sent = opts[:filepath], opts[:ftp_host], opts[:ftp_login], opts[:ftp_password], opts[:ftp_directory], opts[:zip_output_directory], opts[:zip_filename], false
   end
-end
 
-Net::FTP.open('localhost') do |ftp|
-  ftp.passive = true
-  ftp.login('lawgix','obwon=419')
-  files = ftp.chdir('/home/lawgix/zip_ftp/ftp')
-  puts files
-  files = ftp.list('n*')
-  puts files
-  ftp.put(zipfile_name)
+  def send
+
+    filename = File.basename(@filepath)
+    zip_filename = @zip_filename ? @zip_filename : File.basename(filename, ".*")
+    zip_filepath = @zip_output_directory + "/" + zip_filename + ".zip"
+
+    # Create the zip file
+    Zip::File.open(zip_filepath, Zip::File::CREATE) do |zipfile|
+      zipfile.add(filename, @filepath)
+    end
+    puts "zip file created"
+
+    # Send via ftp
+    Net::FTP.open(@ftp_host) do |ftp|
+      ftp.passive = true
+      ftp.login(@ftp_login,@ftp_password)
+      files = ftp.chdir(@ftp_directory)
+      puts files
+      files = ftp.list('n*')
+      puts files
+      ftp.put(zip_filepath)
+    end
+    puts "zip file sent via ftp"
+    @sent = true
+
+  end
+
 end
