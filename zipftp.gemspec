@@ -1,6 +1,6 @@
 Gem::Specification.new do |s|
   s.name        = 'zipftp'
-  s.version     = 0.0.0
+  s.version     = '0.0.0'
   s.date        = '2016-09-02'
   s.summary     = 'ZIP to FTP'
   s.description = 'Convert file(s) to zip and send via ftp'
